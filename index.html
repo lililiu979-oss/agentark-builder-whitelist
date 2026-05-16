@@ -172,7 +172,7 @@
       .form-embed {
         display: block;
         width: 100%;
-        min-height: 560px;
+        min-height: 720px;
         border: 0;
         border-radius: 18px;
         background: var(--surface-strong);
@@ -194,33 +194,27 @@
         word-break: break-all;
       }
 
-      .cta-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 16px;
-        border: 0;
-        min-width: 188px;
-        min-height: 58px;
-        padding: 0 22px;
-        border-radius: 18px;
-        background: var(--brand);
-        color: #fff;
-        font-size: 16px;
-        font-weight: 800;
-        letter-spacing: -0.01em;
-        cursor: pointer;
-        text-decoration: none;
-        transition:
-          transform 140ms ease,
-          background 140ms ease,
-          box-shadow 140ms ease;
-        box-shadow: 0 18px 34px rgba(91, 92, 240, 0.22);
+      .form-embed-tip {
+        margin-top: 18px;
+        font-size: 14px;
+        color: var(--muted);
       }
 
-      .cta-button:hover {
-        background: var(--brand-strong);
-        transform: translateY(-1px);
+      .form-fallback {
+        margin-top: 8px;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .form-fallback a {
+        font-weight: 600;
+        color: var(--brand);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .form-fallback a:hover {
+        color: var(--brand-strong);
       }
 
       .hint {
@@ -304,8 +298,8 @@
           border-radius: 24px;
         }
 
-        .cta-button {
-          width: 100%;
+        .form-fallback {
+          padding-bottom: 4px;
         }
       }
     </style>
@@ -345,18 +339,22 @@
         <aside class="form-card">
           <p class="form-title">Whitelist signup</p>
           <p class="form-copy">
-            Apply with the Google Form below. Responses go straight to a Google Sheet you own (Responses →
-            spreadsheet icon).
+            Submit in place in the embedded form below (scroll inside the framed area — Google puts
+            <strong>Submit</strong> at the bottom). Responses sync to your Google Sheet from the Responses tab.
           </p>
 
           <div id="signup-embed" class="form-embed-wrap"></div>
+          <p class="hint form-embed-tip">
+            No second page needed: your answers submit inside this page. Use the backup link only if embedding
+            looks broken or you want full-screen.
+          </p>
           <p class="hint">
             Best for AI agent providers: founders, solo developers, studios, and product teams offering
             workplace AI agents for business workflows.
           </p>
-          <p class="hint">
-            <a id="signup-tab" class="cta-button" href="#" target="_blank" rel="noopener noreferrer" hidden
-              >Open form in a new tab</a
+          <p class="form-fallback">
+            <a id="signup-tab" href="#" target="_blank" rel="noopener noreferrer" hidden
+              >Open form in full screen</a
             >
           </p>
         </aside>
@@ -379,19 +377,33 @@
     </main>
 
     <script>
-      /** Paste your Google Form “send” link, e.g. https://docs.google.com/forms/d/e/xxxx/viewform */
+      /** Public form URL (prefer without ?usp=publish-editor for cleaner embed). */
       const GOOGLE_FORM_URL =
-        "https://docs.google.com/forms/d/e/1FAIpQLSdpenKaWPQ85P9OoZHKajehwNYxwzp2Feap4mm4af2LgXUieg/viewform?usp=publish-editor";
+        "https://docs.google.com/forms/d/e/1FAIpQLSdpenKaWPQ85P9OoZHKajehwNYxwzp2Feap4mm4af2LgXUieg/viewform";
 
       const mount = document.getElementById("signup-embed");
       const tabLink = document.getElementById("signup-tab");
 
-      function toEmbedSrc(url) {
-        if (!url || url === "REPLACE_WITH_YOUR_GOOGLE_FORM_URL") return "";
-        if (url.includes("embedded=true")) return url;
-        return url.includes("?") ? `${url}&embedded=true` : `${url}?embedded=true`;
+      /** Cleaner URL for iframe + respondent link (drops editor-ish query params). */
+      function respondentFormUrl(raw) {
+        try {
+          const u = new URL(raw);
+          u.searchParams.delete("usp");
+          return u.pathname.endsWith("/viewform") ? u.toString() : raw;
+        } catch {
+          return raw;
+        }
       }
 
+      function toEmbedSrc(url) {
+        if (!url || url === "REPLACE_WITH_YOUR_GOOGLE_FORM_URL") return "";
+        const base = respondentFormUrl(url);
+        if (!base) return "";
+        if (base.includes("embedded=true")) return base;
+        return base.includes("?") ? `${base}&embedded=true` : `${base}?embedded=true`;
+      }
+
+      const cleanFormUrl = respondentFormUrl(GOOGLE_FORM_URL);
       const embedSrc = toEmbedSrc(GOOGLE_FORM_URL);
       if (embedSrc) {
         const iframe = document.createElement("iframe");
@@ -402,7 +414,7 @@
         iframe.src = embedSrc;
         mount.appendChild(iframe);
 
-        tabLink.href = GOOGLE_FORM_URL;
+        tabLink.href = cleanFormUrl;
         tabLink.removeAttribute("hidden");
       } else {
         mount.innerHTML =
