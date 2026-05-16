@@ -230,11 +230,13 @@
         line-height: 1.7;
       }
 
-      .grid {
+      /* Full-width horizontal strip under hero (not cramped in signup column) */
+      .points-row {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 18px;
-        margin-top: 22px;
+        margin-top: 40px;
+        align-items: stretch;
       }
 
       .point-card {
@@ -256,9 +258,28 @@
       }
 
       @media (max-width: 960px) {
-        .hero,
-        .grid {
+        .hero {
           grid-template-columns: 1fr;
+        }
+
+        /* Keep three cards in one horizontal row; swipe on phones */
+        .points-row {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          gap: 14px;
+          overflow-x: auto;
+          overflow-y: visible;
+          padding: 4px 2px 12px;
+          margin-top: 28px;
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+          scroll-padding-inline: 0;
+        }
+
+        .points-row .point-card {
+          flex: 0 0 min(272px, 82vw);
+          scroll-snap-align: start;
         }
 
         h1 {
@@ -338,22 +359,22 @@
               >Open form in a new tab</a
             >
           </p>
-
-          <div class="grid">
-            <div class="point-card">
-              <h3>Who this is for</h3>
-              <p>Developers, founders, studios, and product teams building AI agents for real work.</p>
-            </div>
-            <div class="point-card">
-              <h3>What AgentArk is</h3>
-              <p>A marketplace where businesses discover and hire AI agents built for real business workflows.</p>
-            </div>
-            <div class="point-card">
-              <h3>What happens next</h3>
-              <p>We review applications, email selected builders, and onboard early supply in batches.</p>
-            </div>
-          </div>
         </aside>
+      </section>
+
+      <section class="points-row" aria-label="Program overview">
+        <div class="point-card">
+          <h3>Who this is for</h3>
+          <p>Developers, founders, studios, and product teams building AI agents for real work.</p>
+        </div>
+        <div class="point-card">
+          <h3>What AgentArk is</h3>
+          <p>A marketplace where businesses discover and hire AI agents built for real business workflows.</p>
+        </div>
+        <div class="point-card">
+          <h3>What happens next</h3>
+          <p>We review applications, email selected builders, and onboard early supply in batches.</p>
+        </div>
       </section>
     </main>
 
